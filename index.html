@@ -160,9 +160,10 @@
     <!-- Modal d'attente de paiement -->
     <div id="payModal" class="fixed inset-0 z-[70] bg-black/80 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-live="polite">
         <div class="bg-brand-card text-white border border-brand-border rounded-3xl p-8 max-w-sm w-full text-center">
-            <div class="spinner mx-auto mb-6"></div>
-            <h3 class="text-lg font-bold mb-2">Demande envoyée sur votre téléphone...</h3>
+            <div id="payModalSpinner" class="spinner mx-auto mb-6"></div>
+            <h3 id="payModalTitle" class="text-lg font-bold mb-2">Demande envoyée sur votre téléphone...</h3>
             <p id="payModalText" class="text-sm text-gray-400">Veuillez saisir votre code secret pour valider le paiement.</p>
+            <button id="payModalClose" type="button" class="hidden mt-6 w-full bg-brand-red hover:bg-red-700 text-white font-bold py-3 rounded-xl text-sm uppercase tracking-wider">Fermer</button>
         </div>
     </div>
 
@@ -462,7 +463,7 @@
         })();
 
         // ===== CONFIGURATION À COMPLÉTER =====
-        const PRICES = { "Grand Public": 3000, "Pelouse": null, "Premium": null, "VIP": null, "VVIP": null }; // en FCFA
+        const PRICES = { "Grand Public": null, "Pelouse": null, "Premium": null, "VIP": null, "VVIP": null }; // en FCFA
         const CONTACT_EMAIL = "contact@exemple.com"; // adresse de gestion qui reçoit les candidatures
         const SELLING_POINTS = ["Point de vente 1 - à confirmer", "Point de vente 2 - à confirmer", "Point de vente 3 - à confirmer"];
         const STAND_PRICES = { "Stand exposant": 0, "Stand restauration": 0, "Accréditation média / presse": 0 }; // en FCFA
@@ -472,24 +473,39 @@
         // Une fois déployé sur Vercel, créez les fonctions serverless /api/payments/initiate et
         // /api/payments/status (clés secrètes uniquement côté serveur) et un webhook
         // /api/webhooks/cinetpay (ou /paytech) qui confirme le paiement et marque le billet comme valide.
-        const PAYMENT_CONFIG = { gateway: 'simulation', apiBase: '/api/payments', simulationDelayMs: 3000 };
+        const PAYMENT_CONFIG = { gateway: 'simulation', apiBase: '/api/payments', simulationDelayMs: 4500 };
 
         const wait = ms => new Promise(r => setTimeout(r, ms));
         const whatsappLink = (phone, text) => 'https://wa.me/' + phone.replace(/\D/g, '') + '?text=' + encodeURIComponent(text);
 
         function showPayModal(provider) {
+            document.getElementById('payModalSpinner').classList.remove('hidden');
+            document.getElementById('payModalClose').classList.add('hidden');
+            document.getElementById('payModalTitle').textContent = 'Demande envoyée sur votre téléphone...';
             document.getElementById('payModalText').textContent = 'Veuillez saisir votre code secret ' + provider + ' pour valider le paiement.';
             document.getElementById('payModal').classList.add('open');
         }
         const hidePayModal = () => document.getElementById('payModal').classList.remove('open');
 
-        // Retourne { status: 'success' | 'failed', transactionId, message }
+        // Mode simulation : aucun billet n'est émis, le modal affiche un message d'attente avec un bouton Fermer.
+        function showGatewayPending() {
+            document.getElementById('payModalSpinner').classList.add('hidden');
+            document.getElementById('payModalTitle').textContent = 'Paiement non disponible';
+            document.getElementById('payModalText').textContent = "En attente de la passerelle de paiement Orange Money / Moov / Wave. La billetterie officielle ouvrira dès la confirmation de la date du concert.";
+            const close = document.getElementById('payModalClose');
+            close.classList.remove('hidden');
+            return new Promise(resolve => close.addEventListener('click', () => { hidePayModal(); resolve(); }, { once: true }));
+        }
+
+        // Retourne { status: 'success' | 'failed' | 'pending', transactionId, message }
+        // Seul le statut 'success' (confirmé par la passerelle / le webhook) doit déclencher l'émission d'un billet.
         async function processPayment(provider, amount, meta = {}) {
             showPayModal(provider);
             try {
                 if (PAYMENT_CONFIG.gateway === 'simulation') {
                     await wait(PAYMENT_CONFIG.simulationDelayMs);
-                    return { status: 'success', transactionId: uid('TX') };
+                    await showGatewayPending();
+                    return { status: 'pending' };
                 }
                 // Passerelle réelle : le serveur crée la transaction et renvoie un identifiant.
                 const init = await fetch(PAYMENT_CONFIG.apiBase + '/initiate', {
@@ -557,6 +573,7 @@
             btn.disabled = true;
             try {
                 const pay = await processPayment(f.paiement.value, amount, { type: 'ticket', phone, categorie: f.categorie.value, qte: qty });
+                if (pay.status === 'pending') return;
                 if (pay.status !== 'success') throw new Error(pay.message || 'Paiement refusé');
                 const qrs = document.getElementById('ticketQrs');
                 qrs.innerHTML = '';
@@ -590,6 +607,7 @@
             btn.disabled = true;
             try {
                 const pay = await processPayment(f.paiement.value, STAND_PRICES[f.type.value] || 0, { type: 'stand', phone, stand: f.type.value, societe: f.societe.value });
+                if (pay.status === 'pending') return;
                 if (pay.status !== 'success') throw new Error(pay.message || 'Paiement refusé');
                 out.innerHTML = '';
                 const code = uid('EXP');
