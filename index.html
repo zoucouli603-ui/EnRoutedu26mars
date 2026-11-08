@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>En Route du 26 Mars | Concert Géant 2027 - Stade du 26 Mars, Bamako</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Génération de QR codes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- AOS (Animate On Scroll) -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#e50914',
+                            dark: '#0f0f0f',
+                            card: '#181818',
+                            border: '#2a2a2a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f0f0f;
+            color: #ffffff;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        .bg-glass {
+            background: rgba(24, 24, 24, 0.85);
+            backdrop-filter: blur(12px);
+        }
+        .hero-slide {
+            opacity: 0;
+            animation: heroFade 18s infinite;
+        }
+        .hero-slide:nth-child(2) { animation-delay: 6s; }
+        .hero-slide:nth-child(3) { animation-delay: 12s; }
+        @keyframes heroFade {
+            0% { opacity: 0; }
+            8% { opacity: 1; }
+            33% { opacity: 1; }
+            41% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+        /* Mode clair */
+        body, header, section, .bg-brand-card { transition: background-color .3s, color .3s; }
+        body.light { background-color: #ffffff; color: #111111; }
+        body.light .bg-glass { background: rgba(255, 255, 255, 0.9); }
+        body.light header h1, body.light #evenement h3, body.light #evenement h2 { color: #111111; }
+        body.light #evenement .bg-brand-card { background-color: #f3f4f6; }
+        body.light .border-brand-border { border-color: #e5e7eb; }
+        body.light #evenement .text-gray-400, body.light #evenement { color: #4b5563; }
+        body.light #evenement { background-color: #ffffff; }
+        #accueil { color: #ffffff; }
+        body.light #accueil .border-brand-border { border-color: #2a2a2a; }
+        body.light #accueil .text-gray-400 { color: #9ca3af; }
+        body.light #accueil input { background-color: rgba(0,0,0,.5); color: #fff; }
+        /* Sections supplémentaires en mode clair */
+        .field { background: rgba(0,0,0,.5); border: 1px solid #2a2a2a; border-radius: .75rem; padding: .75rem 1rem; font-size: .875rem; color: #fff; width: 100%; }
+        .field:focus { outline: none; border-color: #e50914; }
+        .field option { color: #111; }
+        body.light .sec { background-color: #ffffff; color: #4b5563; }
+        body.light .sec h2, body.light .sec h3, body.light .sec h4, body.light .sec .strong { color: #111111; }
+        body.light .sec .bg-brand-card { background-color: #f3f4f6; }
+        body.light .sec .text-gray-400 { color: #4b5563; }
+        body.light .sec .field { background: #ffffff; color: #111111; border-color: #d1d5db; }
+        body.light .sec .qr-box, body.light .sec .qr-box * { color: #111; }
+        .poster-glow { box-shadow: 0 0 60px rgba(229,9,20,.45), 0 0 0 4px rgba(229,9,20,.6); }
+        .qr-box canvas, .qr-box img { background: #fff; padding: 6px; border-radius: .5rem; }
+        /* Mobile-first : pas de défilement horizontal */
+        html, body { overflow-x: hidden; }
+        input, select, textarea { font-size: 16px; } /* évite le zoom auto sur iOS */
+        @media (min-width: 640px) { input, select, textarea { font-size: .875rem; } }
+        /* Transitions boutons */
+        button, .btn { transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease; }
+        button:active, .btn:active { transform: scale(.96); }
+        /* Carrousel : léger zoom pendant le fondu */
+        .hero-slide { transform: scale(1); animation: heroFade 18s infinite, heroZoom 18s infinite linear; }
+        @keyframes heroZoom { from { transform: scale(1); } to { transform: scale(1.1); } }
+        /* Drawer mobile */
+        #drawerOverlay { opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+        #drawerOverlay.open { opacity: 1; pointer-events: auto; }
+        #drawer { transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); }
+        #drawer.open { transform: translateX(0); }
+        body.light #drawer { background: #ffffff; color: #111111; }
+        .bar { display: block; width: 20px; height: 2px; background: currentColor; transition: transform .3s ease, opacity .3s ease; }
+        #burger.open .bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+        #burger.open .bar:nth-child(2) { opacity: 0; }
+        #burger.open .bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+        /* Modal paiement */
+        #payModal { opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+        #payModal.open { opacity: 1; pointer-events: auto; }
+        .spinner { width: 56px; height: 56px; border: 5px solid rgba(255,255,255,.15); border-top-color: #e50914; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) {
+            .hero-slide { animation-name: heroFade; }
+        }
+    </style>
+</head>
+<body class="pb-28">
+
+    <!-- Header Navigation (Style Yacou B OG) -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-glass border-b border-brand-border">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
+            <a href="#accueil" class="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                <img src="static/images/logo-26mars.png" class="h-10 w-auto" alt="Logo En Route du 26 Mars">
+                <div class="min-w-0">
+                    <h1 class="font-black text-sm sm:text-lg tracking-wide sm:tracking-wider text-white uppercase leading-none truncate">EN ROUTE DU 26 MARS</h1>
+                    <span class="block text-[10px] sm:text-xs text-brand-red font-semibold uppercase tracking-wider truncate">Concert Tchièma • Yacou B OG</span>
+                </div>
+            </a>
+            
+            <nav class="hidden lg:flex items-center space-x-6 text-sm font-medium">
+                <a href="#accueil" class="hover:text-brand-red transition">Accueil</a>
+                <a href="#evenement" class="hover:text-brand-red transition">L'Événement</a>
+                <a href="#billetterie" class="hover:text-brand-red transition">Billetterie</a>
+                <a href="#partenaires" class="hover:text-brand-red transition">Partenaires</a>
+                <a href="#stands" class="hover:text-brand-red transition">Stands</a>
+                <a href="#prestations" class="hover:text-brand-red transition">Prestations</a>
+                <a href="#infoline" class="hover:text-brand-red transition">Infoline</a>
+            </nav>
+
+            <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
+                <button id="themeToggle" type="button" aria-label="Basculer mode nuit / jour" class="w-10 h-10 rounded-full border border-brand-border flex items-center justify-center hover:text-brand-red">
+                    <i id="themeIcon" class="fa-solid fa-sun"></i>
+                </button>
+                <a href="#billetterie" class="hidden sm:inline-block bg-brand-red hover:bg-red-700 text-white font-bold px-5 py-2 rounded-full text-sm transition transform hover:scale-105 shadow-lg shadow-red-600/30">
+                    Billetterie
+                </a>
+                <button id="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="drawer" class="lg:hidden w-10 h-10 rounded-full border border-brand-border flex flex-col items-center justify-center gap-[4px]">
+                    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Drawer mobile -->
+    <div id="drawerOverlay" class="fixed inset-0 bg-black/60 z-[55] lg:hidden"></div>
+    <aside id="drawer" class="fixed top-0 right-0 bottom-0 w-72 max-w-[85%] bg-brand-card z-[60] lg:hidden p-6 pt-20 flex flex-col gap-1 shadow-2xl" aria-label="Menu mobile">
+        <a href="#accueil" class="drawer-link py-3 border-b border-brand-border font-semibold hover:text-brand-red transition">Accueil</a>
+        <a href="#evenement" class="drawer-link py-3 border-b border-brand-border font-semibold hover:text-brand-red transition">L'Événement</a>
+        <a href="#billetterie" class="drawer-link py-3 border-b border-brand-border font-semibold hover:text-brand-red transition">Billetterie</a>
+        <a href="#partenaires" class="drawer-link py-3 border-b border-brand-border font-semibold hover:text-brand-red transition">Partenaires</a>
+        <a href="#stands" class="drawer-link py-3 border-b border-brand-border font-semibold hover:text-brand-red transition">Stands &amp; Médias</a>
+        <a href="#prestations" class="drawer-link py-3 border-b border-brand-border font-semibold hover:text-brand-red transition">Prestations</a>
+        <a href="#infoline" class="drawer-link py-3 border-b border-brand-border font-semibold hover:text-brand-red transition">Infoline</a>
+        <a href="#billetterie" class="drawer-link mt-6 text-center bg-brand-red text-white font-bold py-3 rounded-full">Réserver mon ticket</a>
+    </aside>
+
+    <!-- Modal d'attente de paiement -->
+    <div id="payModal" class="fixed inset-0 z-[70] bg-black/80 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-live="polite">
+        <div class="bg-brand-card text-white border border-brand-border rounded-3xl p-8 max-w-sm w-full text-center">
+            <div class="spinner mx-auto mb-6"></div>
+            <h3 class="text-lg font-bold mb-2">Demande envoyée sur votre téléphone...</h3>
+            <p id="payModalText" class="text-sm text-gray-400">Veuillez saisir votre code secret pour valider le paiement.</p>
+        </div>
+    </div>
+
+    <!-- Section Hero & Compte à Rebours (Phase Teaser) -->
+    <section id="accueil" class="relative pt-32 pb-20 px-4     min-h-[85vh] flex items-center justify-center overflow-hidden">
+            <!-- Slider d'arrière-plan -->
+            <div class="absolute inset-0" aria-hidden="true">
+                <img src="static/images/stade1.jpg" alt="" class="hero-slide absolute inset-0 w-full h-full object-cover">
+                <img src="static/images/stade2.jpg" alt="" class="hero-slide absolute inset-0 w-full h-full object-cover">
+                <img src="static/images/stade3.jpg" alt="" class="hero-slide absolute inset-0 w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/70"></div>
+            </div>
+            <div class="max-w-4xl mx-auto text-center relative z-10">
+            
+            <span class="inline-block bg-brand-red/20 text-brand-red border border-brand-red/40 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+                Événement Historique • 2027
+            </span>
+            
+            <h2 class="text-4xl md:text-7xl font-black uppercase tracking-tight mb-6 leading-tight">
+                LE PLUS GRAND CONCERT DE L'ANNÉE AU <span class="text-brand-red">STADE DU 26 MARS</span>
+            </h2>
+            
+            <p class="text-gray-400 text-base md:text-lg max-w-2xl mx-auto mb-10">
+                Restez connectés pour être les premiers informés de l'annonce officielle de la date et bénéficier d'un accès prioritaire à la billetterie VIP.
+            </p>
+
+            <!-- Compte à Rebours Stylisé -->
+            <div class="grid grid-cols-4 gap-3 md:gap-6 max-w-2xl mx-auto mb-12">
+                <div class="bg-brand-card border border-brand-border p-4 md:p-6 rounded-2xl shadow-xl">
+                    <span id="days" class="text-3xl md:text-6xl font-black text-brand-red block mb-1">00</span>
+                    <span class="text-xs uppercase text-gray-400 font-bold tracking-wider">Jours</span>
+                </div>
+                <div class="bg-brand-card border border-brand-border p-4 md:p-6 rounded-2xl shadow-xl">
+                    <span id="hours" class="text-3xl md:text-6xl font-black text-white block mb-1">00</span>
+                    <span class="text-xs uppercase text-gray-400 font-bold tracking-wider">Heures</span>
+                </div>
+                <div class="bg-brand-card border border-brand-border p-4 md:p-6 rounded-2xl shadow-xl">
+                    <span id="minutes" class="text-3xl md:text-6xl font-black text-white block mb-1">00</span>
+                    <span class="text-xs uppercase text-gray-400 font-bold tracking-wider">Minutes</span>
+                </div>
+                <div class="bg-brand-card border border-brand-border p-4 md:p-6 rounded-2xl shadow-xl">
+                    <span id="seconds" class="text-3xl md:text-6xl font-black text-brand-red block mb-1">00</span>
+                    <span class="text-xs uppercase text-gray-400 font-bold tracking-wider">Secondes</span>
+                </div>
+            </div>
+    
+            </div>
+    </section>
+
+    <!-- Section Présentation du Stade / Projet -->
+    <section id="evenement" class="py-16 px-4 border-t border-brand-border">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-3 h-8 bg-brand-red rounded-full"></div>
+                <h2 class="text-2xl md:text-3xl font-black uppercase tracking-wide">Une Expérience Événementielle Inédite</h2>
+            </div>
+
+            <!-- Affiche officielle -->
+            <figure class="relative max-w-md mx-auto mb-12 text-center" data-aos="zoom-in">
+                <div class="absolute -inset-6 bg-brand-red/20 blur-3xl rounded-full" aria-hidden="true"></div>
+                <img src="static/images/affiche.jpg" alt="Affiche officielle du concert En Route du 26 Mars"
+                     onerror="this.onerror=null;this.src='static/images/logo-26mars.png';this.classList.add('p-10','bg-black','object-contain');"
+                     class="relative w-full rounded-3xl poster-glow transition duration-500 hover:scale-[1.03]">
+                <figcaption class="relative mt-5 text-xs font-bold uppercase tracking-widest text-brand-red">Affiche officielle • Concert Tcièma • Yacou B OG</figcaption>
+            </figure>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl" data-aos="fade-up">
+                    <div class="w-12 h-12 bg-brand-red/10 text-brand-red rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Capacité Maximale</h3>
+                    <p class="text-sm text-gray-400">Le mythique Stade du 26 Mars de Bamako configuré pour accueillir plus de 50 000 spectateurs dans une ambiance survoltée.</p>
+                </div>
+
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-12 h-12 bg-brand-red/10 text-brand-red rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">E-Billetterie & QR Code</h3>
+                    <p class="text-sm text-gray-400">Système sécurisé avec envoi instantané du billet électronique sur WhatsApp & SMS (Orange Money, Moov Money).</p>
+                </div>
+
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-12 h-12 bg-brand-red/10 text-brand-red rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Show VIP & Coulisses</h3>
+                    <p class="text-sm text-gray-400">Accès aux répétitions, espaces lounges réservés, vlogs exclusifs et rencontres d'artistes invités.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Billetterie -->
+    <section id="billetterie" class="sec py-16 px-4 border-t border-brand-border">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-3 h-8 bg-brand-red rounded-full"></div>
+                <h2 class="text-2xl md:text-3xl font-black uppercase tracking-wide">Billetterie</h2>
+            </div>
+
+            <div id="priceGrid" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <form id="ticketForm" class="bg-brand-card border border-brand-border p-4 sm:p-6 rounded-3xl space-y-4" data-aos="fade-up">
+                    <h3 class="text-xl font-bold">Réserver mes tickets</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input name="nom" type="text" required placeholder="Nom complet" class="field">
+                        <input name="whatsapp" type="tel" required placeholder="WhatsApp (+223...)" class="field">
+                        <select name="categorie" id="ticketCat" required class="field"></select>
+                        <input name="qte" type="number" min="1" max="10" value="1" required class="field" aria-label="Quantité">
+                        <select name="mode" class="field">
+                            <option value="online">Réservation en ligne (e-ticket)</option>
+                            <option value="physique">Ticket papier (point de vente)</option>
+                        </select>
+                        <select name="paiement" class="field">
+                            <option>Orange Money</option>
+                            <option>Moov Malitel</option>
+                            <option>Wave</option>
+                        </select>
+                    </div>
+                    <p id="ticketTotal" class="text-sm font-bold strong"></p>
+                    <button type="submit" class="w-full bg-brand-red hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition uppercase text-sm tracking-wider">
+                        <i class="fa-solid fa-mobile-screen mr-2"></i>Payer &amp; générer mes QR codes
+                    </button>
+                    <p class="text-xs text-gray-400">Paiement mobile simulé : aucune transaction réelle n'est effectuée dans cette démo.</p>
+                </form>
+
+                <div class="space-y-6" data-aos="fade-up" data-aos-delay="100">
+                    <div id="ticketResult" class="hidden bg-brand-card border border-brand-red/40 p-6 rounded-3xl">
+                        <h3 class="text-lg font-bold mb-3"><i class="fa-brands fa-whatsapp text-green-500 mr-2"></i>Tickets générés</h3>
+                        <p id="ticketWa" class="text-sm text-gray-400 mb-4"></p>
+                        <div id="ticketQrs" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                        <a id="ticketWaLink" target="_blank" rel="noopener" class="btn mt-4 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl text-sm"><i class="fa-brands fa-whatsapp mr-2"></i>Envoyer sur mon WhatsApp</a>
+                    </div>
+                    <div class="bg-brand-card border border-brand-border p-6 rounded-3xl">
+                        <h3 class="text-lg font-bold mb-3"><i class="fa-solid fa-location-dot text-brand-red mr-2"></i>Points de vente (tickets papier)</h3>
+                        <ul id="posList" class="text-sm text-gray-400 space-y-2 list-disc pl-5"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partenaires -->
+    <section id="partenaires" class="sec py-16 px-4 border-t border-brand-border">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-3 h-8 bg-brand-red rounded-full"></div>
+                <h2 class="text-2xl md:text-3xl font-black uppercase tracking-wide">Partenaires</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2 bg-brand-card border border-brand-red/40 rounded-3xl overflow-hidden grid sm:grid-cols-2" data-aos="zoom-in">
+                    <img src="static/images/partenaire1.png" alt="3X Energy - Sponsor principal" class="w-full h-full object-cover">
+                    <div class="p-6 flex flex-col justify-center">
+                        <span class="text-xs font-bold uppercase tracking-widest text-brand-red mb-2">Sponsor principal officiel</span>
+                        <h3 class="text-3xl font-black mb-2">3X ENERGY</h3>
+                        <p class="text-sm text-gray-400">« 3 fois plus fort ! » La boisson énergétique officielle du concert En Route du 26 Mars.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 md:grid-rows-2 gap-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="bg-brand-card border border-dashed border-brand-border rounded-3xl p-6 flex items-center justify-center text-center text-sm text-gray-400">Espace partenaire Or<br>Votre logo ici</div>
+                    <div class="bg-brand-card border border-dashed border-brand-border rounded-3xl p-6 flex items-center justify-center text-center text-sm text-gray-400">Espace partenaire Argent<br>Votre logo ici</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stands & Médias -->
+    <section id="stands" class="sec py-16 px-4 border-t border-brand-border">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-3 h-8 bg-brand-red rounded-full"></div>
+                <h2 class="text-2xl md:text-3xl font-black uppercase tracking-wide">Stands</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <form id="standForm" class="bg-brand-card border border-brand-border p-4 sm:p-6 rounded-3xl space-y-4" data-aos="fade-up">
+                    <h3 class="text-xl font-bold">Réserver un stand maintenant</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input name="nom" type="text" required placeholder="Nom du responsable" class="field">
+                        <input name="societe" type="text" required placeholder="Société" class="field">
+                        <input name="whatsapp" type="tel" required placeholder="WhatsApp (+223...)" class="field">
+                        <input name="email" type="email" required placeholder="Email" class="field">
+                        <select name="type" class="field">
+                            <option>Stand exposant</option>
+                            <option>Stand restauration</option>
+                            <option>Accréditation média / presse</option>
+                        </select>
+                        <select name="paiement" class="field">
+                            <option>Orange Money</option>
+                            <option>Moov Malitel</option>
+                            <option>Wave</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-brand-red hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition uppercase text-sm tracking-wider">Réserver &amp; générer le QR exposant</button>
+                </form>
+                <div id="standResult" class="hidden bg-brand-card border border-brand-red/40 p-6 rounded-3xl">
+                    <h3 class="text-lg font-bold mb-3">Pass exposant / média</h3>
+                    <div id="standQr" class="grid grid-cols-1 gap-4"></div>
+                    <a id="standWaLink" target="_blank" rel="noopener" class="btn mt-4 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl text-sm"><i class="fa-brands fa-whatsapp mr-2"></i>Envoyer sur mon WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prestations -->
+    <section id="prestations" class="sec py-16 px-4 border-t border-brand-border">
+        <div class="max-w-3xl mx-auto">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-3 h-8 bg-brand-red rounded-full"></div>
+                <h2 class="text-2xl md:text-3xl font-black uppercase tracking-wide">Prestations artistes &amp; intervenants</h2>
+            </div>
+            <form id="prestaForm" action="" method="POST" class="bg-brand-card border border-brand-border p-4 sm:p-6 rounded-3xl space-y-4" data-aos="fade-up">
+                <input type="hidden" name="_subject" value="Nouvelle candidature - En Route du 26 Mars">
+                <input type="text" name="_honey" class="hidden" tabindex="-1" autocomplete="off">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input name="nom" type="text" required placeholder="Nom / Nom de scène" class="field">
+                    <input name="telephone" type="tel" required placeholder="Téléphone" class="field">
+                    <input name="email" type="email" required placeholder="Email" class="field">
+                    <select name="discipline" class="field">
+                        <option>Artiste musical</option><option>Danseur / Troupe</option><option>Humoriste</option><option>DJ / Technique son &amp; lumière</option><option>Autre intervenant</option>
+                    </select>
+                </div>
+                <input name="lien" type="url" placeholder="Lien portfolio / vidéo (YouTube, Instagram...)" class="field">
+                <textarea name="message" rows="4" required placeholder="Présentez votre prestation et vos besoins techniques" class="field"></textarea>
+                <button type="submit" class="w-full bg-brand-red hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition uppercase text-sm tracking-wider">Envoyer ma candidature</button>
+                <p id="prestaMsg" class="text-sm font-semibold hidden"></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- Infoline -->
+    <section id="infoline" class="sec py-16 px-4 border-t border-brand-border">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-3 mb-8">
+                <div class="w-3 h-8 bg-brand-red rounded-full"></div>
+                <h2 class="text-2xl md:text-3xl font-black uppercase tracking-wide">Infoline</h2>
+            </div>
+            <p class="text-sm text-gray-400 mb-6">Assistance et réservations téléphoniques</p>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <a href="tel:+22383838580" class="bg-brand-card border border-brand-border hover:border-brand-red rounded-2xl p-6 transition">
+                    <i class="fa-solid fa-phone text-brand-red text-2xl mb-2"></i>
+                    <div class="text-2xl font-black strong">+223 83 83 85 80</div>
+                </a>
+                <a href="tel:+22379989898" class="bg-brand-card border border-brand-border hover:border-brand-red rounded-2xl p-6 transition">
+                    <i class="fa-solid fa-phone text-brand-red text-2xl mb-2"></i>
+                    <div class="text-2xl font-black strong">+223 79 98 98 98</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Script Compte à Rebours -->
+    <script>
+        // Définition d'une date cible pour 2027 (Exemple : 26 Mars 2027)
+        const targetDate = new Date("March 26, 2027 20:00:00").getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const difference = targetDate - now;
+
+            if (difference > 0) {
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+                document.getElementById("days").innerText = days < 10 ? "0" + days : days;
+                document.getElementById("hours").innerText = hours < 10 ? "0" + hours : hours;
+                document.getElementById("minutes").innerText = minutes < 10 ? "0" + minutes : minutes;
+                document.getElementById("seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
+            }
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Toggle mode nuit / jour
+        (function () {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            function apply(light) {
+                body.classList.toggle('light', light);
+                body.classList.toggle('bg-white', light);
+                body.classList.toggle('bg-[#0f0f0f]', !light);
+                body.classList.toggle('text-white', !light);
+                body.classList.toggle('text-gray-900', light);
+                icon.className = light ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+            }
+            apply(localStorage.getItem('theme') === 'light');
+            document.getElementById('themeToggle').addEventListener('click', function () {
+                const light = !body.classList.contains('light');
+                localStorage.setItem('theme', light ? 'light' : 'dark');
+                apply(light);
+            });
+        })();
+
+        // ===== CONFIGURATION À COMPLÉTER =====
+        const PRICES = { "Grand Public": 3000, "Pelouse": null, "Premium": null, "VIP": null, "VVIP": null }; // en FCFA
+        const CONTACT_EMAIL = "contact@exemple.com"; // adresse de gestion qui reçoit les candidatures
+        const SELLING_POINTS = ["Point de vente 1 - à confirmer", "Point de vente 2 - à confirmer", "Point de vente 3 - à confirmer"];
+        const STAND_PRICES = { "Stand exposant": 0, "Stand restauration": 0, "Accréditation média / presse": 0 }; // en FCFA
+
+        // ===== PAIEMENT : point d'intégration API =====
+        // gateway: 'simulation' (démo) | 'cinetpay' | 'paytech'
+        // Une fois déployé sur Vercel, créez les fonctions serverless /api/payments/initiate et
+        // /api/payments/status (clés secrètes uniquement côté serveur) et un webhook
+        // /api/webhooks/cinetpay (ou /paytech) qui confirme le paiement et marque le billet comme valide.
+        const PAYMENT_CONFIG = { gateway: 'simulation', apiBase: '/api/payments', simulationDelayMs: 3000 };
+
+        const wait = ms => new Promise(r => setTimeout(r, ms));
+        const whatsappLink = (phone, text) => 'https://wa.me/' + phone.replace(/\D/g, '') + '?text=' + encodeURIComponent(text);
+
+        function showPayModal(provider) {
+            document.getElementById('payModalText').textContent = 'Veuillez saisir votre code secret ' + provider + ' pour valider le paiement.';
+            document.getElementById('payModal').classList.add('open');
+        }
+        const hidePayModal = () => document.getElementById('payModal').classList.remove('open');
+
+        // Retourne { status: 'success' | 'failed', transactionId, message }
+        async function processPayment(provider, amount, meta = {}) {
+            showPayModal(provider);
+            try {
+                if (PAYMENT_CONFIG.gateway === 'simulation') {
+                    await wait(PAYMENT_CONFIG.simulationDelayMs);
+                    return { status: 'success', transactionId: uid('TX') };
+                }
+                // Passerelle réelle : le serveur crée la transaction et renvoie un identifiant.
+                const init = await fetch(PAYMENT_CONFIG.apiBase + '/initiate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gateway: PAYMENT_CONFIG.gateway, provider, amount, currency: 'XOF', meta })
+                });
+                if (!init.ok) throw new Error("Impossible d'initier le paiement.");
+                const { transactionId } = await init.json();
+                // Le webhook met à jour le statut côté serveur ; le client interroge ce statut.
+                for (let i = 0; i < 40; i++) {
+                    await wait(3000);
+                    const st = await (await fetch(PAYMENT_CONFIG.apiBase + '/status?id=' + encodeURIComponent(transactionId))).json();
+                    if (st.status === 'success' || st.status === 'failed') return { ...st, transactionId };
+                }
+                return { status: 'failed', transactionId, message: 'Délai de validation dépassé.' };
+            } catch (err) {
+                return { status: 'failed', message: err.message };
+            } finally {
+                hidePayModal();
+            }
+        }
+
+        const fmt = p => p == null ? "[...] FCFA" : p.toLocaleString('fr-FR') + " FCFA";
+        const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const uid = prefix => prefix + "-" + Array.from(crypto.getRandomValues(new Uint8Array(6)), b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+
+        function qrCard(container, code, label) {
+            const card = document.createElement('div');
+            card.className = 'qr-box bg-black/20 border border-brand-border rounded-2xl p-4 text-center';
+            const box = document.createElement('div');
+            box.className = 'flex justify-center mb-2';
+            const cap = document.createElement('div');
+            cap.className = 'text-xs';
+            cap.innerHTML = '<strong>' + esc(label) + '</strong><br>' + esc(code);
+            card.append(box, cap);
+            container.appendChild(card);
+            new QRCode(box, { text: code, width: 140, height: 140 });
+        }
+
+        // Billetterie
+        const priceGrid = document.getElementById('priceGrid');
+        const ticketCat = document.getElementById('ticketCat');
+        Object.entries(PRICES).forEach(([cat, p], i) => {
+            priceGrid.insertAdjacentHTML('beforeend', '<div data-aos="zoom-in" data-aos-delay="' + (i * 100) + '" class="min-w-0 bg-brand-card border border-brand-border rounded-2xl p-4 text-center transition hover:-translate-y-1 hover:border-brand-red"><h4 class="font-bold text-xs sm:text-sm uppercase mb-1 break-words">' + cat + '</h4><div class="text-brand-red font-black text-sm sm:text-base break-words">' + fmt(p) + '</div></div>');
+            ticketCat.insertAdjacentHTML('beforeend', '<option>' + cat + '</option>');
+        });
+        document.getElementById('posList').innerHTML = SELLING_POINTS.map(p => '<li>' + esc(p) + '</li>').join('');
+
+        const ticketForm = document.getElementById('ticketForm');
+        function updateTotal() {
+            const p = PRICES[ticketForm.categorie.value];
+            document.getElementById('ticketTotal').textContent = 'Total : ' + (p == null ? '[...] FCFA' : fmt(p * (parseInt(ticketForm.qte.value) || 1)));
+        }
+        ticketForm.addEventListener('input', updateTotal);
+        updateTotal();
+
+        ticketForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const f = this, qty = Math.min(10, Math.max(1, parseInt(f.qte.value) || 1));
+            const unit = PRICES[f.categorie.value];
+            const amount = unit == null ? 0 : unit * qty;
+            const phone = f.whatsapp.value.replace(/[^\d+]/g, '');
+            const btn = f.querySelector('button[type=submit]');
+            btn.disabled = true;
+            try {
+                const pay = await processPayment(f.paiement.value, amount, { type: 'ticket', phone, categorie: f.categorie.value, qte: qty });
+                if (pay.status !== 'success') throw new Error(pay.message || 'Paiement refusé');
+                const qrs = document.getElementById('ticketQrs');
+                qrs.innerHTML = '';
+                const codes = [];
+                for (let i = 0; i < qty; i++) {
+                    const code = uid('26M');
+                    codes.push(code);
+                    qrCard(qrs, code, 'Billet électronique • ' + f.categorie.value + ' #' + (i + 1));
+                }
+                const isPaper = f.mode.value === 'physique';
+                document.getElementById('ticketWa').textContent = 'Paiement ' + f.paiement.value + ' confirmé (réf. ' + pay.transactionId + '). ' +
+                    (isPaper ? 'Présentez ce code à un point de vente pour retirer votre ticket papier. ' : '') +
+                    'Envoi automatique simulé sur WhatsApp au ' + phone + '.';
+                document.getElementById('ticketWaLink').href = whatsappLink(phone, 'Vos billets En Route du 26 Mars (' + f.categorie.value + ') : ' + codes.join(', '));
+                document.getElementById('ticketResult').classList.remove('hidden');
+                document.getElementById('ticketResult').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                console.log('WhatsApp (simulation) ->', phone, codes);
+            } catch (err) {
+                alert(err.message || 'Le paiement a échoué. Réessayez.');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // Stands & Médias
+        document.getElementById('standForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const f = this, out = document.getElementById('standQr');
+            const phone = f.whatsapp.value.replace(/[^\d+]/g, '');
+            const btn = f.querySelector('button[type=submit]');
+            btn.disabled = true;
+            try {
+                const pay = await processPayment(f.paiement.value, STAND_PRICES[f.type.value] || 0, { type: 'stand', phone, stand: f.type.value, societe: f.societe.value });
+                if (pay.status !== 'success') throw new Error(pay.message || 'Paiement refusé');
+                out.innerHTML = '';
+                const code = uid('EXP');
+                qrCard(out, code, f.type.value + ' - ' + f.societe.value);
+                document.getElementById('standWaLink').href = whatsappLink(phone, 'Votre pass exposant/média En Route du 26 Mars : ' + code);
+                document.getElementById('standResult').classList.remove('hidden');
+                document.getElementById('standResult').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (err) {
+                alert(err.message || 'Le paiement a échoué. Réessayez.');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // Prestations : envoi vers l'e-mail de gestion via FormSubmit
+        document.getElementById('prestaForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const msg = document.getElementById('prestaMsg');
+            msg.classList.remove('hidden');
+            try {
+                const r = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(CONTACT_EMAIL), {
+                    method: 'POST', headers: { 'Accept': 'application/json' }, body: new FormData(this)
+                });
+                if (!r.ok) throw new Error();
+                msg.className = 'text-sm font-semibold text-green-500';
+                msg.textContent = 'Candidature envoyée. Merci !';
+                this.reset();
+            } catch (err) {
+                msg.className = 'text-sm font-semibold text-red-500';
+                msg.textContent = "Échec de l'envoi. Réessayez ou appelez l'infoline.";
+            }
+        });
+
+        // Drawer mobile
+        (function () {
+            const burger = document.getElementById('burger');
+            const drawer = document.getElementById('drawer');
+            const overlay = document.getElementById('drawerOverlay');
+            function setOpen(open) {
+                drawer.classList.toggle('open', open);
+                overlay.classList.toggle('open', open);
+                burger.classList.toggle('open', open);
+                burger.setAttribute('aria-expanded', open);
+                document.body.style.overflow = open ? 'hidden' : '';
+            }
+            burger.addEventListener('click', () => setOpen(!drawer.classList.contains('open')));
+            overlay.addEventListener('click', () => setOpen(false));
+            drawer.querySelectorAll('.drawer-link').forEach(a => a.addEventListener('click', () => setOpen(false)));
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+            window.matchMedia('(min-width: 1024px)').addEventListener('change', e => { if (e.matches) setOpen(false); });
+        })();
+
+        // Animations AOS
+        window.addEventListener('load', () => {
+            if (window.AOS) AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 60 });
+        });
+    </script>
+</body>
+</html>
